@@ -677,6 +677,51 @@ class WikipediaPage(object):
 
     return self.content[index:next_index].lstrip("=").strip()
 
+  def section_mod(self, section_title, header=2):
+    '''
+    Get the plain text content of a section from `self.sections`.
+    Returns None if `section_title` isn't found, otherwise returns a whitespace stripped string.
+
+    This is a convenience method that wraps self.content.
+
+    .. warning:: Calling `section` on a section that has subheadings will NOT return
+           the full text of all of the subsections. It only gets the text between
+           `section_title` and the next subheading, which is often empty.
+    '''
+
+    if header == 2:
+      decor = u"== {} =="
+      closing_sign = ["=="]
+    elif header == 3:
+      decor = u"=== {} ==="
+      closing_sign = ["===", "=="]
+    elif header == 4:
+      decor = u"==== {} ===="
+      closing_sign = ["====", "===", "=="]
+    elif header == 5:
+      decor = u"===== {} ====="
+      closing_sign = ["=====", "====", "===", "=="]
+    elif header == 6:
+      decor = u"====== {} ======"
+      closing_sign = ["======", "=====", "====", "===", "=="]
+
+
+    section = decor.format(section_title)
+    try:
+      index = self.content.index(section) + len(section)
+    except ValueError:
+      return None
+
+    next_index = []
+    try:
+      for i in range(len(closing_sign)):
+        next_index= next_index + [self.content.index(closing_sign[i], index)]
+      next_index = min(next_index)
+    except ValueError:
+      next_index = len(self.content)
+
+    return self.content[index:next_index].lstrip("=").strip()
+
 
 @cache
 def languages():
