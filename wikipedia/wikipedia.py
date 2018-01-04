@@ -287,7 +287,7 @@ class WikipediaPage(object):
   Uses property methods to filter data from the raw HTML.
   '''
 
-  def __init__(self, title=None, pageid=None, redirect=True, preload=False, original_title=''):
+  def __init__(self, title=None, pageid=None, redirect=True, preload=True, original_title=''):
     if title is not None:
       self.title = title
       self.original_title = original_title or title
@@ -689,6 +689,7 @@ class WikipediaPage(object):
            `section_title` and the next subheading, which is often empty.
     '''
 
+
     if header == 2:
       decor = u"== {} =="
       closing_sign = ["=="]
@@ -708,19 +709,22 @@ class WikipediaPage(object):
 
     section = decor.format(section_title)
     try:
-      index = self.content.index(section) + len(section)
+      start_index = self.content.index(section) + len(section)
     except ValueError:
       return None
 
     next_index = []
     try:
       for i in range(len(closing_sign)):
-        next_index= next_index + [self.content.index(closing_sign[i], index)]
+        try:
+          next_index= next_index + [self.content.index(closing_sign[i], start_index)]
+        except:
+          pass
       next_index = min(next_index)
     except ValueError:
       next_index = len(self.content)
 
-    return self.content[index:next_index].lstrip("=").strip()
+    return self.content[start_index:next_index].lstrip("=").strip()
 
 
 @cache
